@@ -1,7 +1,6 @@
-namespace PaymentGateway.Api.Models.Responses
+namespace PaymentGateway.Api.Models.Responses;
+
+public class CardResponse : Card
 {
-    public class CardResponse : Card
-    {
-        public required string CardNumberFinalFourDigits { get; init; } 
-    };
-}
+    public required string CardNumberFinalFourDigits { get; init; }
+};

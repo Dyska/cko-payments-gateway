@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+
 using PaymentGateway.Api.Domain.Models;
 
 namespace PaymentGateway.Api.UnitTests.Models;
@@ -20,6 +21,8 @@ public class PaymentTests
         Assert.Equal(validCard, actual.Card);
         Assert.Equal(validCurrency, actual.ISOCurrencyCode);
         Assert.Equal(validAmount, ToDecimal(actual.Amount));
+        Assert.Equal(PaymentStatus.Pending, actual.Status);
+        Assert.NotEqual(default, actual.Id);
     }
 
     [Fact]

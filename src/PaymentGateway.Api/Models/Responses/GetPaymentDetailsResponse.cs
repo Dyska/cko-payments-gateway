@@ -1,4 +1,3 @@
-namespace PaymentGateway.Api.Models.Responses
-{
-    public class GetPaymentDetailsResponse : PaymentDetailsResponse { };
-}
+namespace PaymentGateway.Api.Models.Responses;
+
+public class GetPaymentDetailsResponse : PaymentDetailsResponse { };
