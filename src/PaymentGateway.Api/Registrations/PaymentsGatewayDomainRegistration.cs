@@ -9,8 +9,8 @@ public static class PaymentsGatewayDomainRegistration
     public static IServiceCollection AddPaymentsGatewayDomain(this IServiceCollection services)
     {
         services.AddScoped<IPaymentService, PaymentService>();
-        services.AddScoped<IPaymentRepository, InMemoryPaymentRepository>();
         services.AddScoped<IBankClient, ImposterBankClient>();
+        services.AddSingleton<IPaymentRepository, InMemoryPaymentRepository>();
 
         return services;
     }

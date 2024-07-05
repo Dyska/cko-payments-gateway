@@ -9,7 +9,6 @@ namespace PaymentGateway.Api.Domain.Clients.Bank;
 
 public class ImposterBankClient : IBankClient
 {
-    //TODO: Read in URI from options
     private readonly HttpClient _httpClient; //TODO: What should scoping of http client be - singleton?
     private readonly JsonSerializerOptions _options;
     private readonly ILogger<ImposterBankClient> _logger;
@@ -27,6 +26,7 @@ public class ImposterBankClient : IBankClient
 
     public async Task<PaymentResponse> SubmitPayment(PaymentRequest paymentRequest)
     {
+        //TODO: Read in URI from options
         string url = "http://localhost:8080/payments";
 
         string jsonContent = JsonSerializer.Serialize(paymentRequest, _options);

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+
 using PaymentGateway.Api.Domain.Models;
 using PaymentGateway.Api.Domain.Services;
 using PaymentGateway.Api.Mappers;
@@ -23,21 +24,12 @@ public class PaymentGatewayController : ControllerBase
     [HttpGet("{id}", Name = "GetPaymentDetails")]
     [ProducesResponseType<GetPaymentDetailsResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public IActionResult GetPaymentDetails([FromRoute] Guid id)
+    public async Task<IActionResult> GetPaymentDetailsAsync([FromRoute] Guid id)
     {
-        return Ok(new GetPaymentDetailsResponse
-        {
-            Id = id,
-            Status = "Authorized",
-            CardDetails = new CardResponse
-            {
-                CardNumberFinalFourDigits = "1234",
-                ExpiryMonth = "01",
-                ExpiryYear = "2025",
-            },
-            ISOCurrencyCode = "NZD",
-            Amount = 10000,
-        });
+        Payment? payment = await _paymentService.FetchPayment(id);
+        GetPaymentDetailsResponse? response = payment.ToGetPaymentDetailsResponse();
+
+        return response != null ? Ok(response) : NotFound();
     }
 
     [HttpPost(Name = "ProcessPayment")]
@@ -54,28 +46,15 @@ public class PaymentGatewayController : ControllerBase
         }
         catch (ArgumentException ex)
         {
-            //TODO: Where should declined status live?
-            return BadRequest(new { Status = "Declined", ex.Message });
+            //TODO: Where should Rejected status live?
+            return BadRequest(new { Status = "Rejected", ex.Message });
         }
 
-        Payment? updatedPayment = await _paymentService.ProcessPayment(payment);
+        Payment submittedPayment = await _paymentService.ProcessPayment(payment);
 
-        //TODO: Map back to response model
-
-        return Created(
-            "", //TODO: Construct URI for response
-            new ProcessPaymentResponse
-            {
-                Id = Guid.NewGuid(),
-                Status = "Authorised",
-                CardDetails = new CardResponse
-                {
-                    CardNumberFinalFourDigits = "1234",
-                    ExpiryMonth = "01",
-                    ExpiryYear = "2025",
-                },
-                ISOCurrencyCode = "NZD",
-                Amount = 10000,
-            });
+        ProcessPaymentResponse response = submittedPayment.ToProcessPaymentResponse();
+        return Created("", //TODO: Construct URI for response
+            response
+            );
     }
 }

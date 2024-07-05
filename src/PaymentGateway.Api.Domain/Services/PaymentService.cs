@@ -1,4 +1,5 @@
-﻿using PaymentGateway.Api.Domain.Clients.Bank;
+﻿
+using PaymentGateway.Api.Domain.Clients.Bank;
 using PaymentGateway.Api.Domain.Models;
 using PaymentGateway.Api.Domain.Repositories;
 
@@ -15,14 +16,14 @@ public class PaymentService : IPaymentService
         _bankClient = bankClient;
     }
 
-    public async Task<Payment?> ProcessPayment(Payment payment)
+    public async Task<Payment?> FetchPayment(Guid paymentId)
     {
-        bool didSave = await _paymentRepository.SavePayment(payment);
-        if (!didSave)
-        {
-            //TODO: Handle didSave - idempotency?
-            return null;
-        }
+        return await _paymentRepository.GetPayment(paymentId);
+    }
+
+    public async Task<Payment> ProcessPayment(Payment payment)
+    {
+        await _paymentRepository.SavePayment(payment);
 
         var bankPaymentRequest = payment.ToBankPaymentRequest();
         var bankPaymentResponse = await _bankClient.SubmitPayment(bankPaymentRequest);
