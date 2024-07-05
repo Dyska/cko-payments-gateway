@@ -35,9 +35,9 @@ namespace PaymentGateway.Api.Domain.Models
             return isMonthValid && isYearValid && IsMonthYearInFuture(month, year);
         }
 
+        //Assumption: Card is valid until UTC midnight in expiry month + year
         private static bool IsMonthYearInFuture(int month, int year)
         {
-            //For simplicity, assume that card is valid until UTC midnight in expiry month + year
             var utcNow = DateTime.UtcNow;
 
             if (year < utcNow.Year || (year == utcNow.Year && month < utcNow.Month))

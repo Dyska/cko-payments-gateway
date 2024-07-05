@@ -1,6 +1,6 @@
-namespace PaymentGateway.Api.Models
+namespace PaymentGateway.Api.Models.Requests
 {
-    public class ProcessPaymentRequestBody
+    public class ProcessPaymentRequest
     {
         public required CardRequest Card { get; init; }
         public required string ISOCurrencyCode { get; init; }

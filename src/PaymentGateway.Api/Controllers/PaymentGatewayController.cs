@@ -2,7 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 
 using PaymentGateway.Api.Domain.Models;
 using PaymentGateway.Api.Mappers;
-using PaymentGateway.Api.Models;
+using PaymentGateway.Api.Models.Requests;
+using PaymentGateway.Api.Models.Responses;
 
 namespace PaymentGateway.Api.Controllers
 {
@@ -24,7 +25,7 @@ namespace PaymentGateway.Api.Controllers
         {
             return Ok(new GetPaymentDetailsResponse {
                 Id = id,
-                Status = PaymentRequestStatus.Authorized,
+                Status = "Authorized",
                 CardDetails = new CardResponse {
                     CardNumberFinalFourDigits = "1234",
                     ExpiryMonth = "01",
@@ -38,7 +39,7 @@ namespace PaymentGateway.Api.Controllers
         [HttpPost(Name = "ProcessPayment")]
         [ProducesResponseType<ProcessPaymentResponse>(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public IActionResult ProcessPayment([FromBody] ProcessPaymentRequestBody body)
+        public IActionResult ProcessPayment([FromBody] ProcessPaymentRequest body)
         {
             //Don't forget idempotency token!
 
@@ -46,14 +47,21 @@ namespace PaymentGateway.Api.Controllers
             try {
                 payment = body.ToPayment();
             } catch (ArgumentException ex) {
-                return BadRequest(new { Status = PaymentRequestStatus.Declined, ex.Message});
+                //TODO: Where should declined status live?
+                return BadRequest(new { Status = "Declined", ex.Message});
             }
+
+            //We've now got a payment object, ready to be processed
+
+
+
+
 
             return Created(
                 "", //TODO: Construct URI for response
                 new ProcessPaymentResponse {
                 Id = Guid.NewGuid(),
-                Status = PaymentRequestStatus.Authorized,
+                Status = "Authorised",
                 CardDetails = new CardResponse {
                     CardNumberFinalFourDigits = "1234",
                     ExpiryMonth = "01",

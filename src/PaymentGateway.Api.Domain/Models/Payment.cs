@@ -8,6 +8,8 @@ namespace PaymentGateway.Api.Domain.Models
         public string ISOCurrencyCode { get; }
         public BigInteger Amount { get; }
 
+        //TODO: PaymentStatus - need to work out where this goes
+
         public Payment(Card card, string currencyCode, decimal amount)
         {
             if (!IsISOCurrencyCodeValid(currencyCode)) {
