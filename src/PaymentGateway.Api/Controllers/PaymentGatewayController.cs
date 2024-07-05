@@ -46,7 +46,7 @@ namespace PaymentGateway.Api.Controllers
             try {
                 payment = body.ToPayment();
             } catch (ArgumentException ex) {
-                return BadRequest(new { Status = PaymentRequestStatus.Declined, Mesage = ex.Message});
+                return BadRequest(new { Status = PaymentRequestStatus.Declined, ex.Message});
             }
 
             return Created(
@@ -60,7 +60,7 @@ namespace PaymentGateway.Api.Controllers
                     ExpiryYear = "2025",
                 },
                 ISOCurrencyCode = "NZD",
-                Amount = 10000,
+                Amount = 10000, //TODO: Decimal?
             });
         }
     }

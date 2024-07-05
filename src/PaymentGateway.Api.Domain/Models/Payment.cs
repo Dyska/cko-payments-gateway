@@ -11,14 +11,14 @@ namespace PaymentGateway.Api.Domain.Models
         public Payment(Card card, string currencyCode, decimal amount)
         {
             if (!IsISOCurrencyCodeValid(currencyCode)) {
-                throw new ArgumentException("Invalid currency code provided. Supported currencies: 'EUR', 'NZD', 'GBP'.");
+                throw new ArgumentException("Invalid currency code provided. Supported currencies: 'USD', 'NZD', 'GBP'.");
             }
             
             if (!IsAmountValid(amount)) {
                 throw new ArgumentException("Amount must be an integer.");
             }
 
-            Card = card;
+            Card = card ?? throw new ArgumentException("Must provide valid Card details.");
             ISOCurrencyCode = currencyCode;
             Amount = ConvertDecimalToBigInteger(amount);
         }
@@ -31,7 +31,7 @@ namespace PaymentGateway.Api.Domain.Models
             }
 
             switch (currencyCode) {
-                case "EUR":
+                case "USD":
                 case "NZD":
                 case "GBP":
                     return true;
@@ -40,9 +40,11 @@ namespace PaymentGateway.Api.Domain.Models
             }
         }
 
+        //Assumption: Negative and 0 amounts are not allowed
         private static bool IsAmountValid(decimal amount)
         {
-            return decimal.Truncate(amount) == amount;
+            bool isInteger = decimal.Truncate(amount) == amount;
+            return isInteger && amount > 0;
         }
 
         private static BigInteger ConvertDecimalToBigInteger(decimal decimalValue) {
