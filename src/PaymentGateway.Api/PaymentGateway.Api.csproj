@@ -14,4 +14,8 @@
     <Folder Include="Controllers" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\PaymentGateway.Api.Domain\PaymentGateway.Api.Domain.csproj" />
+  </ItemGroup>
+
 </Project>

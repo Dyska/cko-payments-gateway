@@ -1,7 +1,8 @@
 namespace PaymentGateway.Api.Models;
 
 public enum PaymentRequestStatus {
-    Rejected = 0,
-    Declined = 1,
-    Authorized = 2,
+    Default = 0,
+    Rejected = 1,
+    Declined = 2,
+    Authorized = 3,
 }
