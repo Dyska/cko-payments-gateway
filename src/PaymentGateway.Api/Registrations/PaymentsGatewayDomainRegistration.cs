@@ -1,3 +1,4 @@
+using PaymentGateway.Api.Domain.Clients.Bank;
 using PaymentGateway.Api.Domain.Repositories;
 using PaymentGateway.Api.Domain.Services;
 
@@ -9,6 +10,7 @@ public static class PaymentsGatewayDomainRegistration
     {
         services.AddScoped<IPaymentService, PaymentService>();
         services.AddScoped<IPaymentRepository, InMemoryPaymentRepository>();
+        services.AddScoped<IBankClient, ImposterBankClient>();
 
         return services;
     }

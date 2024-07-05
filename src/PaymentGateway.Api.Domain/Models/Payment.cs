@@ -1,14 +1,13 @@
-using System.Numerics;
-
 namespace PaymentGateway.Api.Domain.Models;
 
 public class Payment
 {
     public Guid Id { get; init; }
     public PaymentStatus Status { get; private set; }
+    public Guid? AuthorizationCode { get; private set; }
     public Card Card { get; }
     public string ISOCurrencyCode { get; }
-    public BigInteger Amount { get; }
+    public decimal Amount { get; }
 
     public Payment(Card card, string currencyCode, decimal amount)
     {
@@ -27,17 +26,22 @@ public class Payment
 
         Card = card;
         ISOCurrencyCode = currencyCode;
-        Amount = ConvertDecimalToBigInteger(amount);
+        Amount = amount;
 
         Id = Guid.NewGuid();
         Status = PaymentStatus.Pending;
     }
 
-    public void UpdateStatus(PaymentStatus status)
+    //State machine?
+    public void SetSuccessful(Guid authorizationCode)
     {
-        //TODO: state machine - which state transitions are valid?
+        Status = PaymentStatus.Authorized;
+        AuthorizationCode = authorizationCode;
+    }
 
-        Status = status;
+    public void SetDeclined()
+    {
+        Status = PaymentStatus.Declined;
     }
 
     private static bool IsISOCurrencyCodeValid(string currencyCode)
@@ -63,11 +67,5 @@ public class Payment
     {
         bool isInteger = decimal.Truncate(amount) == amount;
         return isInteger && amount > 0;
-    }
-
-    private static BigInteger ConvertDecimalToBigInteger(decimal decimalValue)
-    {
-        string decimalString = decimalValue.ToString();
-        return BigInteger.Parse(decimalString);
     }
 }

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 
 using PaymentGateway.Api.Domain.Models;
+using PaymentGateway.Api.Domain.Services;
 using PaymentGateway.Api.Mappers;
 using PaymentGateway.Api.Models.Requests;
 using PaymentGateway.Api.Models.Responses;
@@ -12,9 +13,11 @@ namespace PaymentGateway.Api.Controllers;
 public class PaymentGatewayController : ControllerBase
 {
     private readonly ILogger<PaymentGatewayController> _logger;
+    private readonly IPaymentService _paymentService;
 
-    public PaymentGatewayController(ILogger<PaymentGatewayController> logger)
+    public PaymentGatewayController(IPaymentService paymentService, ILogger<PaymentGatewayController> logger)
     {
+        _paymentService = paymentService;
         _logger = logger;
     }
 
@@ -41,7 +44,7 @@ public class PaymentGatewayController : ControllerBase
     [HttpPost(Name = "ProcessPayment")]
     [ProducesResponseType<ProcessPaymentResponse>(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public IActionResult ProcessPayment([FromBody] ProcessPaymentRequest body)
+    public async Task<IActionResult> ProcessPayment([FromBody] ProcessPaymentRequest body)
     {
         //Don't forget idempotency token!
 
@@ -57,10 +60,9 @@ public class PaymentGatewayController : ControllerBase
         }
 
         //We've now got a payment object, ready to be processed
+        Payment? updatedPayment = await _paymentService.ProcessPayment(payment);
 
-
-
-
+        //TODO: Map back to response model
 
         return Created(
             "", //TODO: Construct URI for response

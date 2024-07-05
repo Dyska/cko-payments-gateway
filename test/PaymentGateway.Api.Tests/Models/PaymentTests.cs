@@ -1,26 +1,25 @@
-﻿using System.Numerics;
-
-using PaymentGateway.Api.Domain.Models;
+﻿using PaymentGateway.Api.Domain.Models;
 
 namespace PaymentGateway.Api.UnitTests.Models;
 
 public class PaymentTests
 {
-    [Fact]
-    public void Payment_ValidInputs_PropertiesMatchInput()
+    [Theory]
+    [InlineData(1489)]
+    [InlineData(101300000000000)] //GDP of the world
+    public void Payment_ValidInputs_PropertiesMatchInput(decimal inputAmount)
     {
         //Arrange
         var validCard = new Card("03", "2025", "2222405343248877", "354");
         var validCurrency = "NZD";
-        decimal validAmount = 1489m;
 
         //Act
-        var actual = new Payment(validCard, validCurrency, validAmount);
+        var actual = new Payment(validCard, validCurrency, inputAmount);
 
         //Assert
+        Assert.Equal(inputAmount, actual.Amount);
         Assert.Equal(validCard, actual.Card);
         Assert.Equal(validCurrency, actual.ISOCurrencyCode);
-        Assert.Equal(validAmount, ToDecimal(actual.Amount));
         Assert.Equal(PaymentStatus.Pending, actual.Status);
         Assert.NotEqual(default, actual.Id);
     }
@@ -69,10 +68,5 @@ public class PaymentTests
         //Act
         //Assert
         Assert.Throws<ArgumentException>(() => new Payment(validCard, validCurrency, inputAmount));
-    }
-
-    private static decimal ToDecimal(BigInteger bigIntegerValue)
-    {
-        return decimal.Parse(bigIntegerValue.ToString());
     }
 }
