@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-
 using PaymentGateway.Api.Domain.Models;
 using PaymentGateway.Api.Domain.Services;
 using PaymentGateway.Api.Mappers;
@@ -59,7 +58,6 @@ public class PaymentGatewayController : ControllerBase
             return BadRequest(new { Status = "Declined", ex.Message });
         }
 
-        //We've now got a payment object, ready to be processed
         Payment? updatedPayment = await _paymentService.ProcessPayment(payment);
 
         //TODO: Map back to response model
@@ -77,7 +75,7 @@ public class PaymentGatewayController : ControllerBase
                     ExpiryYear = "2025",
                 },
                 ISOCurrencyCode = "NZD",
-                Amount = 10000, //TODO: Decimal?
+                Amount = 10000,
             });
     }
 }

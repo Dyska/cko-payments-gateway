@@ -38,7 +38,7 @@ public class ImposterBankClient : IBankClient
             response.EnsureSuccessStatusCode();
 
             string responseBody = await response.Content.ReadAsStringAsync();
-            PaymentResponse? paymentResponse = JsonSerializer.Deserialize<PaymentResponse>(responseBody);
+            PaymentResponse? paymentResponse = JsonSerializer.Deserialize<PaymentResponse>(responseBody, _options);
             return paymentResponse ?? new PaymentResponse(false);
         }
         catch (HttpRequestException e)
