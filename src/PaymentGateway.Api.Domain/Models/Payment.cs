@@ -11,7 +11,7 @@ namespace PaymentGateway.Api.Domain.Models
         public Payment(Card card, string currencyCode, decimal amount)
         {
             if (!IsISOCurrencyCodeValid(currencyCode)) {
-                throw new ArgumentException("Invalid currency code provided.");
+                throw new ArgumentException("Invalid currency code provided. Supported currencies: 'EUR', 'NZD', 'GBP'.");
             }
             
             if (!IsAmountValid(amount)) {

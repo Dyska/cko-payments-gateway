@@ -7,7 +7,7 @@ namespace PaymentGateway.Api.Domain.Models
         public string CardNumber { get; }
         public string CVV { get; }
 
-        public Card(string expiryMonth, string expiryYear, string cardNumber, string cVV)
+        public Card(string expiryMonth, string expiryYear, string cardNumber, string cvv)
         {
             if (!IsMonthAndYearExpiryValid(expiryMonth, expiryYear)) {
                 throw new ArgumentException("The provided month and year must be valid and in the future.");
@@ -17,14 +17,14 @@ namespace PaymentGateway.Api.Domain.Models
                 throw new ArgumentException("Card number must be between 14 and 19 characters long and only contain numeric characters.");
             }
 
-            if (!IsCVVValid(cVV)) {
+            if (!IsCVVValid(cvv)) {
                 throw new ArgumentException("CVV must be between 3 and 4 characters long and only contain numeric characters.");
             }
 
             ExpiryMonth = expiryMonth;
             ExpiryYear = expiryYear;
             CardNumber = cardNumber;
-            CVV = cVV;
+            CVV = cvv;
         }
 
         private static bool IsMonthAndYearExpiryValid(string inputMonth, string inputYear)
@@ -37,12 +37,11 @@ namespace PaymentGateway.Api.Domain.Models
 
         private static bool IsMonthYearInFuture(int month, int year)
         {
-            var currentDateTime = DateTime.Now;
-            //Add a 24 hour grace period to ensure timezones don't cause issues
-            var futureGracePeriod = currentDateTime.AddHours(24);
+            //For simplicity, assume that card is valid until UTC midnight in expiry month + year
+            var currentUtcDateTime = DateTime.UtcNow;
 
-            int futureYear = futureGracePeriod.Year;
-            int futureMonth = futureGracePeriod.Month;
+            int futureYear = currentUtcDateTime.Year;
+            int futureMonth = currentUtcDateTime.Month;
 
             if (year < futureYear || (year == futureYear && month < futureMonth))
             {

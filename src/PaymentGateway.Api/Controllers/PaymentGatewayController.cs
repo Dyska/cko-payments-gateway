@@ -7,7 +7,7 @@ using PaymentGateway.Api.Models;
 namespace PaymentGateway.Api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/v1/[controller]")]
     public class PaymentGatewayController : ControllerBase
     {
         private readonly ILogger<PaymentGatewayController> _logger;
