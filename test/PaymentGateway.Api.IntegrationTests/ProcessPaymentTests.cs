@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Http.Json;
-using System.Text;
 
 using Microsoft.AspNetCore.Mvc.Testing;
 
@@ -20,10 +19,15 @@ public class ProcessPaymentTests : IClassFixture<WebApplicationFactory<Program>>
     {
         // Arrange
         var client = _factory.CreateClient();
-        var emptyContent = new StringContent(string.Empty, Encoding.UTF8, "application/json");
+
+        var request = new HttpRequestMessage(HttpMethod.Post, "/api/v1/payments")
+        {
+            Content = JsonContent.Create(string.Empty)
+        };
+        request.Headers.Add("Idempotency-Token", Guid.NewGuid().ToString());
 
         // Act
-        var response = await client.PostAsync($"/api/v1/payments", emptyContent);
+        var response = await client.SendAsync(request);
 
         // Assert
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
@@ -34,8 +38,10 @@ public class ProcessPaymentTests : IClassFixture<WebApplicationFactory<Program>>
     {
         // Arrange
         var client = _factory.CreateClient();
-        var paymentBodyMissingAmount = new {
-            card = new {
+        var paymentBodyMissingAmount = new
+        {
+            card = new
+            {
                 expiryMonth = "01",
                 expiryYear = "2026",
                 cardNumber = "2222405343248877",
@@ -44,8 +50,14 @@ public class ProcessPaymentTests : IClassFixture<WebApplicationFactory<Program>>
             isoCurrencyCode = "NZD",
         };
 
+        var request = new HttpRequestMessage(HttpMethod.Post, "/api/v1/payments")
+        {
+            Content = JsonContent.Create(paymentBodyMissingAmount)
+        };
+        request.Headers.Add("Idempotency-Token", Guid.NewGuid().ToString());
+
         // Act
-        var response = await client.PostAsync($"/api/v1/payments", JsonContent.Create(paymentBodyMissingAmount));
+        var response = await client.SendAsync(request);
 
         // Assert
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
@@ -56,8 +68,10 @@ public class ProcessPaymentTests : IClassFixture<WebApplicationFactory<Program>>
     {
         // Arrange
         var client = _factory.CreateClient();
-        var paymentBodyUnsupportedCurrency = new {
-            card = new {
+        var paymentBodyUnsupportedCurrency = new
+        {
+            card = new
+            {
                 expiryMonth = "01",
                 expiryYear = "2026",
                 cardNumber = "2222405343248877",
@@ -67,8 +81,14 @@ public class ProcessPaymentTests : IClassFixture<WebApplicationFactory<Program>>
             amount = 10000,
         };
 
+        var request = new HttpRequestMessage(HttpMethod.Post, "/api/v1/payments")
+        {
+            Content = JsonContent.Create(paymentBodyUnsupportedCurrency)
+        };
+        request.Headers.Add("Idempotency-Token", Guid.NewGuid().ToString());
+
         // Act
-        var response = await client.PostAsync($"/api/v1/payments", JsonContent.Create(paymentBodyUnsupportedCurrency));
+        var response = await client.SendAsync(request);
 
         // Assert
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
@@ -82,8 +102,10 @@ public class ProcessPaymentTests : IClassFixture<WebApplicationFactory<Program>>
     {
         // Arrange
         var client = _factory.CreateClient();
-        var paymentBody = new {
-            card = new {
+        var paymentBody = new
+        {
+            card = new
+            {
                 expiryMonth = "04",
                 expiryYear = "2025",
                 cardNumber = "2222405343248877",
@@ -93,8 +115,14 @@ public class ProcessPaymentTests : IClassFixture<WebApplicationFactory<Program>>
             amount = 100,
         };
 
+        var request = new HttpRequestMessage(HttpMethod.Post, "/api/v1/payments")
+        {
+            Content = JsonContent.Create(paymentBody)
+        };
+        request.Headers.Add("Idempotency-Token", Guid.NewGuid().ToString());
+
         // Act
-        var response = await client.PostAsync($"/api/v1/payments", JsonContent.Create(paymentBody));
+        var response = await client.SendAsync(request);
 
         // Assert
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
@@ -122,8 +150,10 @@ public class ProcessPaymentTests : IClassFixture<WebApplicationFactory<Program>>
         // cvv of 457 will return a 400 response from Bank client, which is mapped to Rejected
 
         var client = _factory.CreateClient();
-        var paymentBody = new {
-            card = new {
+        var paymentBody = new
+        {
+            card = new
+            {
                 expiryMonth = "01",
                 expiryYear = "2026",
                 cardNumber = "2222405343248112",
@@ -133,8 +163,14 @@ public class ProcessPaymentTests : IClassFixture<WebApplicationFactory<Program>>
             amount = 60000,
         };
 
+        var request = new HttpRequestMessage(HttpMethod.Post, "/api/v1/payments")
+        {
+            Content = JsonContent.Create(paymentBody)
+        };
+        request.Headers.Add("Idempotency-Token", Guid.NewGuid().ToString());
+
         // Act
-        var response = await client.PostAsync($"/api/v1/payments", JsonContent.Create(paymentBody));
+        var response = await client.SendAsync(request);
 
         // Assert
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
@@ -152,5 +188,44 @@ public class ProcessPaymentTests : IClassFixture<WebApplicationFactory<Program>>
         Assert.Contains("\"amount\":60000", contentString);
     }
 
-    //Check duplicate requests trigger failure due to idempotency
+    [Fact]
+    public async Task ProcessPayment_DuplicateRequests_ReturnsTooManyRequests()
+    {
+        // Arrange
+        var client = _factory.CreateClient();
+        string sharedIdempotencyHeader = Guid.NewGuid().ToString();
+
+        var paymentBody = new
+        {
+            card = new
+            {
+                expiryMonth = "04",
+                expiryYear = "2025",
+                cardNumber = "2222405343248877",
+                cvv = "123"
+            },
+            isoCurrencyCode = "GBP",
+            amount = 100,
+        };
+
+        var firstRequest = new HttpRequestMessage(HttpMethod.Post, "/api/v1/payments")
+        {
+            Content = JsonContent.Create(paymentBody)
+        };
+        var secondRequest = new HttpRequestMessage(HttpMethod.Post, "/api/v1/payments")
+        {
+            Content = JsonContent.Create(paymentBody)
+        };
+
+        firstRequest.Headers.Add("Idempotency-Token", sharedIdempotencyHeader);
+        secondRequest.Headers.Add("Idempotency-Token", sharedIdempotencyHeader);
+
+        // Act
+        var _ = await client.SendAsync(firstRequest); //First request should be fine
+        var response = await client.SendAsync(secondRequest);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.TooManyRequests, response.StatusCode);
+    }
+
 }

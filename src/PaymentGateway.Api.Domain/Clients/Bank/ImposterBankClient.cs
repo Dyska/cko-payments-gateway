@@ -40,14 +40,16 @@ public class ImposterBankClient : IBankClient
             string responseBody = await response.Content.ReadAsStringAsync();
 
             PaymentResponse? paymentResponse = JsonSerializer.Deserialize<PaymentResponse>(responseBody, _options);
-            return paymentResponse ?? new PaymentResponse {
+            return paymentResponse ?? new PaymentResponse
+            {
                 Authorized = false
             };
         }
         catch (HttpRequestException e)
         {
             _logger.LogWarning($"Request to submit payment to bank failed: {e.Message}");
-            return new PaymentResponse {
+            return new PaymentResponse
+            {
                 Authorized = false
             };
         }

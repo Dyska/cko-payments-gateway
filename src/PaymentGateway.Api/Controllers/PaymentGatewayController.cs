@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 
 using PaymentGateway.Api.Domain.Models;
 using PaymentGateway.Api.Domain.Services;
+using PaymentGateway.Api.Filters;
 using PaymentGateway.Api.Mappers;
 using PaymentGateway.Api.Models.Requests;
 using PaymentGateway.Api.Models.Responses;
@@ -33,12 +34,11 @@ public class PaymentGatewayController : ControllerBase
     }
 
     [HttpPost(Name = "ProcessPayment")]
+    [IdempotencyHeaderFilter("Idempotency-Token")]
     [ProducesResponseType<ProcessPaymentResponse>(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> ProcessPayment([FromBody] ProcessPaymentRequest body)
     {
-        //Don't forget idempotency token!
-
         Payment payment;
         try
         {
