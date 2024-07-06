@@ -22,7 +22,7 @@ public class GetPaymentTests : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Fact]
-    public async Task GetPayment_WhenPaymentNotInDatabase_Returns404()
+    public async Task GetPayment_WhenPaymentNotInDatabase_ReturnsNotFound()
     {
         // Arrange
         var client = _factory.CreateClient();
@@ -36,7 +36,7 @@ public class GetPaymentTests : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Fact]
-    public async Task GetPayment_WhenPaymentInDatabase_Returns200()
+    public async Task GetPayment_WhenPaymentInDatabase_ReturnsOK()
     {
         var validCard = new Card("03", "2025", "2222405343248877", "354");
         var validCurrency = "NZD";

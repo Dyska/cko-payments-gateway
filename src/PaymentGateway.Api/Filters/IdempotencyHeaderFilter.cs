@@ -22,13 +22,13 @@ public class IdempotencyHeaderFilter : ActionFilterAttribute
 
     public override void OnActionExecuting(ActionExecutingContext context)
     {
-        if (!context.HttpContext.Request.Headers.ContainsKey(_headerName))
+        if (!context.HttpContext.Request.Headers.TryGetValue(_headerName, out Microsoft.Extensions.Primitives.StringValues value))
         {
             context.Result = new BadRequestObjectResult($"Missing required header: {_headerName}");
             return;
         }
 
-        string headerValue = context.HttpContext.Request.Headers[_headerName]!;
+        string headerValue = value!;
 
         if (_cache.TryGetValue(headerValue, out var _))
         {

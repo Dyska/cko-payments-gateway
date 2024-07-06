@@ -141,14 +141,11 @@ public class ProcessPaymentTests : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Theory]
-    [InlineData("456")]
-    [InlineData("457")]
+    [InlineData("456")] // cvv of 456 will return a 200, Rejected response from Bank client
+    [InlineData("457")] // cvv of 457 will return a 400 response from Bank client, which is also mapped to Rejected
     public async Task ProcessPayment_PaymentRejectedByBank_ReturnsCreatedWithDeclinedStatus(string cvv)
     {
         // Arrange
-        // cvv of 456 will return a 200, Rejected response from Bank client
-        // cvv of 457 will return a 400 response from Bank client, which is mapped to Rejected
-
         var client = _factory.CreateClient();
         var paymentBody = new
         {
@@ -227,5 +224,4 @@ public class ProcessPaymentTests : IClassFixture<WebApplicationFactory<Program>>
         // Assert
         Assert.Equal(HttpStatusCode.TooManyRequests, response.StatusCode);
     }
-
 }

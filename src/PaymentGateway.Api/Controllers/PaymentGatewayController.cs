@@ -13,13 +13,11 @@ namespace PaymentGateway.Api.Controllers;
 [Route("api/v1/payments")]
 public class PaymentGatewayController : ControllerBase
 {
-    private readonly ILogger<PaymentGatewayController> _logger; //Is this used?
     private readonly IPaymentService _paymentService;
 
-    public PaymentGatewayController(IPaymentService paymentService, ILogger<PaymentGatewayController> logger)
+    public PaymentGatewayController(IPaymentService paymentService)
     {
         _paymentService = paymentService;
-        _logger = logger;
     }
 
     [HttpGet("{id}", Name = "GetPaymentDetails")]
@@ -48,12 +46,9 @@ public class PaymentGatewayController : ControllerBase
         {
             return BadRequest(new { Status = PaymentStatus.Rejected, ex.Message });
         }
-
         Payment submittedPayment = await _paymentService.ProcessPayment(payment);
 
         ProcessPaymentResponse response = submittedPayment.ToProcessPaymentResponse();
-        return Created("", //TODO: Construct URI for response
-            response
-            );
+        return CreatedAtAction("GetPaymentDetails", new { id = response.Id }, response);
     }
 }

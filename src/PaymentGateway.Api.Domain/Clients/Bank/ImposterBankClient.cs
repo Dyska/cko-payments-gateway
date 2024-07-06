@@ -16,7 +16,7 @@ public class ImposterBankClient : IBankClient
     public ImposterBankClient(ILogger<ImposterBankClient> logger)
     {
         _logger = logger;
-        _httpClient = new HttpClient(); //This approach will not scale
+        _httpClient = new HttpClient(); //This approach will not scale - socket exhausation
         _options = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
