@@ -12,7 +12,7 @@ namespace PaymentGateway.Api.Controllers;
 [Route("api/v1/[controller]")]
 public class PaymentGatewayController : ControllerBase
 {
-    private readonly ILogger<PaymentGatewayController> _logger;
+    private readonly ILogger<PaymentGatewayController> _logger; //Is this used?
     private readonly IPaymentService _paymentService;
 
     public PaymentGatewayController(IPaymentService paymentService, ILogger<PaymentGatewayController> logger)
@@ -46,8 +46,7 @@ public class PaymentGatewayController : ControllerBase
         }
         catch (ArgumentException ex)
         {
-            //TODO: Where should Rejected status live?
-            return BadRequest(new { Status = "Rejected", ex.Message });
+            return BadRequest(new { Status = PaymentStatus.Rejected, ex.Message });
         }
 
         Payment submittedPayment = await _paymentService.ProcessPayment(payment);

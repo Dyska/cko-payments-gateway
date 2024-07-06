@@ -9,14 +9,14 @@ namespace PaymentGateway.Api.Domain.Clients.Bank;
 
 public class ImposterBankClient : IBankClient
 {
-    private readonly HttpClient _httpClient; //TODO: What should scoping of http client be - singleton?
-    private readonly JsonSerializerOptions _options;
     private readonly ILogger<ImposterBankClient> _logger;
+    private readonly HttpClient _httpClient;
+    private readonly JsonSerializerOptions _options;
 
     public ImposterBankClient(ILogger<ImposterBankClient> logger)
     {
         _logger = logger;
-        _httpClient = new HttpClient(); //TODO: DI?
+        _httpClient = new HttpClient(); //This approach will not scale
         _options = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
@@ -26,7 +26,7 @@ public class ImposterBankClient : IBankClient
 
     public async Task<PaymentResponse> SubmitPayment(PaymentRequest paymentRequest)
     {
-        //TODO: Read in URI from options
+        //Note: Would read from AppSettings + Options
         string url = "http://localhost:8080/payments";
 
         string jsonContent = JsonSerializer.Serialize(paymentRequest, _options);
@@ -43,7 +43,7 @@ public class ImposterBankClient : IBankClient
         }
         catch (HttpRequestException e)
         {
-            _logger.LogWarning($"Request error: {e.Message}");
+            _logger.LogWarning($"Request to submit payment to bank failed: {e.Message}");
             return new PaymentResponse(false);
         }
     }

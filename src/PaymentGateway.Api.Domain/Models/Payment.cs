@@ -28,11 +28,10 @@ public class Payment
         ISOCurrencyCode = currencyCode;
         Amount = amount;
 
-        Id = Guid.NewGuid();
+        Id = Guid.NewGuid(); //If using real database, should generate this there
         Status = PaymentStatus.Pending;
     }
 
-    //State machine?
     public void SetSuccessful(Guid authorizationCode)
     {
         Status = PaymentStatus.Authorized;

@@ -10,6 +10,9 @@ public static class PaymentsGatewayDomainRegistration
     {
         services.AddScoped<IPaymentService, PaymentService>();
         services.AddScoped<IBankClient, ImposterBankClient>();
+
+        //Note: Singleton only makes sense here because this object needs to persist between requests
+        //A traditional repository would be scoped or transient 
         services.AddSingleton<IPaymentRepository, InMemoryPaymentRepository>();
 
         return services;
