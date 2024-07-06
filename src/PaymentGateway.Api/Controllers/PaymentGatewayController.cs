@@ -9,7 +9,7 @@ using PaymentGateway.Api.Models.Responses;
 namespace PaymentGateway.Api.Controllers;
 
 [ApiController]
-[Route("api/v1/[controller]")]
+[Route("api/v1/payments")]
 public class PaymentGatewayController : ControllerBase
 {
     private readonly ILogger<PaymentGatewayController> _logger; //Is this used?

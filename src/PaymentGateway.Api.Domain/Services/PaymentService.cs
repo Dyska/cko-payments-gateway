@@ -29,7 +29,7 @@ public class PaymentService : IPaymentService
 
         if (bankPaymentResponse.Authorized)
         {
-            payment.SetSuccessful(bankPaymentResponse.AuthorizationCode!.Value);
+            payment.SetSuccessful(Guid.Parse(bankPaymentResponse.AuthorizationCode!));
         }
         else
         {

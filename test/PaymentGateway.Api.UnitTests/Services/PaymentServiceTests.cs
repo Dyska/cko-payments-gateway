@@ -5,7 +5,6 @@ using PaymentGateway.Api.Domain.Clients.Bank.Models;
 using PaymentGateway.Api.Domain.Models;
 using PaymentGateway.Api.Domain.Repositories;
 using PaymentGateway.Api.Domain.Services;
-using PaymentGateway.Api.UnitTests.Helpers;
 
 namespace PaymentGateway.Api.UnitTests.Services;
 
@@ -26,7 +25,7 @@ public class PaymentServiceTests
     public async void FetchPayment_WhenPaymentExists_ReturnsPayment()
     {
         //Arrange
-        var validPayment = TestPaymentFactory.GenerateValidPayment();
+        var validPayment = GenerateValidPayment();
         var paymentId = validPayment.Id;
         _mockPaymentRepository.Setup(pay => pay.GetPayment(It.Is<Guid>(g => g == paymentId))).ReturnsAsync(validPayment);
 
@@ -59,13 +58,13 @@ public class PaymentServiceTests
     public async void ProcessPayment_SavesPaymentToRepository()
     {
         //Arrange
-        var validPayment = TestPaymentFactory.GenerateValidPayment();
+        var validPayment = GenerateValidPayment();
         _mockBankClient.Setup(
             b => b.SubmitPayment(It.IsAny<PaymentRequest>()))
             .ReturnsAsync(new PaymentResponse
             {
                 Authorized = true,
-                AuthorizationCode = Guid.NewGuid(),
+                AuthorizationCode = Guid.NewGuid().ToString(),
             });
 
         //Act
@@ -79,13 +78,13 @@ public class PaymentServiceTests
     public async void ProcessPayment_SubmitsPaymentToBankInCorrectFormat()
     {
         //Arrange
-        var validPayment = TestPaymentFactory.GenerateValidPayment();
+        var validPayment = GenerateValidPayment();
         _mockBankClient.Setup(
             b => b.SubmitPayment(It.IsAny<PaymentRequest>()))
             .ReturnsAsync(new PaymentResponse
             {
                 Authorized = true,
-                AuthorizationCode = Guid.NewGuid(),
+                AuthorizationCode = Guid.NewGuid().ToString(),
             });
 
         //Act
@@ -107,8 +106,8 @@ public class PaymentServiceTests
     public async void ProcessPayment_WhenBankAuthorizesPayment_PaymentStatusSetToAuthorized()
     {
         //Arrange
-        var validPayment = TestPaymentFactory.GenerateValidPayment();
-        var authorizationCode = Guid.NewGuid();
+        var validPayment = GenerateValidPayment();
+        string authorizationCode = Guid.NewGuid().ToString();
         _mockBankClient.Setup(
             b => b.SubmitPayment(It.IsAny<PaymentRequest>()))
             .ReturnsAsync(new PaymentResponse
@@ -122,7 +121,7 @@ public class PaymentServiceTests
 
         //Assert
         Assert.Equal(PaymentStatus.Authorized, actual.Status);
-        Assert.Equal(authorizationCode, actual.AuthorizationCode);
+        Assert.Equal(authorizationCode, actual.AuthorizationCode.ToString());
 
         //Other properties unchanged
         Assert.Equal(validPayment.Amount, actual.Amount);
@@ -135,7 +134,7 @@ public class PaymentServiceTests
     public async void ProcessPayment_WhenBankDeclinesPayment_PaymentStatusSetToDeclined()
     {
         //Arrange
-        var validPayment = TestPaymentFactory.GenerateValidPayment();
+        var validPayment = GenerateValidPayment();
         _mockBankClient.Setup(
             b => b.SubmitPayment(It.IsAny<PaymentRequest>()))
             .ReturnsAsync(new PaymentResponse
@@ -163,12 +162,12 @@ public class PaymentServiceTests
     public async void ProcessPayment_RegardlessOfBankResponse_UpdatesPaymentInRepository(bool shouldBankAuthorizeRequest)
     {
         //Arrange
-        var validPayment = TestPaymentFactory.GenerateValidPayment();
+        var validPayment = GenerateValidPayment();
         var paymentResponse = shouldBankAuthorizeRequest ?
             new PaymentResponse
             {
                 Authorized = true,
-                AuthorizationCode = Guid.NewGuid(),
+                AuthorizationCode = Guid.NewGuid().ToString(),
             } :
             new PaymentResponse
             {
@@ -184,5 +183,14 @@ public class PaymentServiceTests
 
         //Assert
         _mockPaymentRepository.Verify(pay => pay.UpdatePayment(It.IsAny<Payment>()), Times.Once());
+    }
+
+    private static Payment GenerateValidPayment()
+    {
+        var validCard = new Card("03", "2025", "2222405343248877", "354");
+        var validCurrency = "NZD";
+        var inputAmount = 1000m;
+
+        return new Payment(validCard, validCurrency, inputAmount);
     }
 }
