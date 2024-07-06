@@ -62,7 +62,11 @@ public class PaymentServiceTests
         var validPayment = TestPaymentFactory.GenerateValidPayment();
         _mockBankClient.Setup(
             b => b.SubmitPayment(It.IsAny<PaymentRequest>()))
-            .ReturnsAsync(new PaymentResponse(authorized: true, Guid.NewGuid()));
+            .ReturnsAsync(new PaymentResponse
+            {
+                Authorized = true,
+                AuthorizationCode = Guid.NewGuid(),
+            });
 
         //Act
         await _subject.ProcessPayment(validPayment);
@@ -78,7 +82,11 @@ public class PaymentServiceTests
         var validPayment = TestPaymentFactory.GenerateValidPayment();
         _mockBankClient.Setup(
             b => b.SubmitPayment(It.IsAny<PaymentRequest>()))
-            .ReturnsAsync(new PaymentResponse(authorized: true, Guid.NewGuid()));
+            .ReturnsAsync(new PaymentResponse
+            {
+                Authorized = true,
+                AuthorizationCode = Guid.NewGuid(),
+            });
 
         //Act
         await _subject.ProcessPayment(validPayment);
@@ -103,7 +111,11 @@ public class PaymentServiceTests
         var authorizationCode = Guid.NewGuid();
         _mockBankClient.Setup(
             b => b.SubmitPayment(It.IsAny<PaymentRequest>()))
-            .ReturnsAsync(new PaymentResponse(authorized: true, authorizationCode));
+            .ReturnsAsync(new PaymentResponse
+            {
+                Authorized = true,
+                AuthorizationCode = authorizationCode,
+            });
 
         //Act
         var actual = await _subject.ProcessPayment(validPayment);
@@ -126,7 +138,10 @@ public class PaymentServiceTests
         var validPayment = TestPaymentFactory.GenerateValidPayment();
         _mockBankClient.Setup(
             b => b.SubmitPayment(It.IsAny<PaymentRequest>()))
-            .ReturnsAsync(new PaymentResponse(authorized: false));
+            .ReturnsAsync(new PaymentResponse
+            {
+                Authorized = false,
+            });
 
         //Act
         var actual = await _subject.ProcessPayment(validPayment);
@@ -149,7 +164,16 @@ public class PaymentServiceTests
     {
         //Arrange
         var validPayment = TestPaymentFactory.GenerateValidPayment();
-        var paymentResponse = shouldBankAuthorizeRequest ? new PaymentResponse(true, Guid.NewGuid()) : new PaymentResponse(false);
+        var paymentResponse = shouldBankAuthorizeRequest ?
+            new PaymentResponse
+            {
+                Authorized = true,
+                AuthorizationCode = Guid.NewGuid(),
+            } :
+            new PaymentResponse
+            {
+                Authorized = false,
+            };
 
         _mockBankClient.Setup(
             b => b.SubmitPayment(It.IsAny<PaymentRequest>()))

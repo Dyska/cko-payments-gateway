@@ -1,7 +1,7 @@
 namespace PaymentGateway.Api.Domain.Clients.Bank.Models;
 
-public class PaymentResponse(bool authorized, Guid? authorizationCode = null)
+public class PaymentResponse()
 {
-    public bool Authorized { get; init; } = authorized;
-    public Guid? AuthorizationCode { get; init; } = authorizationCode;
+    public bool Authorized { get; init; }
+    public Guid? AuthorizationCode { get; init; }
 }
